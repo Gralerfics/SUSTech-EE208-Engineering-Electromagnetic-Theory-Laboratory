@@ -1,0 +1,31 @@
+classdef Charge
+    % Charge
+
+    properties
+        q
+        p
+    end
+    
+    methods
+        function obj = Charge(q, p)                                         % Constructor
+            obj.q = q;
+            obj.p = p;
+        end
+
+        function d = EvalDistance(p)
+            displacement = obj.p - p;
+            d = displacement.mat_;
+        end
+
+        function V = EvalPotentialField(x_mesh, y_mesh)
+            [n_y, n_x] = size(x_mesh);
+            V = zeros(1,2)
+            for x_idx = 1 : n_x
+                for y_idx = 1 : n_y
+                    r_ = EvalDistance(Point([x_mesh(y_idx, x_idx), y_mesh(y_idx, x_idx)]));
+                    V(y_idx, x_idx) = Constants.k * obj.q / r_;
+                end
+            end
+        end
+    end
+end

@@ -1,0 +1,33 @@
+clear;
+clc;
+
+%% Definitions
+% Parameters
+rho = 1e-9; % [C/m]
+segments = 10;
+% Viewport
+range_size_x = 4;
+range_size_y = 3;
+range_sampling_rate = 50;
+range_vec_x = linspace(-range_size_x / 2, range_size_x / 2, range_size_x * range_sampling_rate);
+range_vec_y = linspace(-range_size_y / 2, range_size_y / 2, range_size_y * range_sampling_rate);
+[mesh_x, mesh_y] = meshgrid(range_vec_x, range_vec_y);
+
+%% Potential Distribution
+V_diff = Constants.k .* rho .* ...
+        log((1 - mesh_x + sqrt((1 - mesh_x) .* (1 - mesh_x) + mesh_y .* mesh_y)) ...
+        ./ (-1 - mesh_x + sqrt((-1 - mesh_x) .* (-1 - mesh_x) + mesh_y .* mesh_y)));
+charges_len = 2 / segments;
+charges_q = rho * charges_len;
+for i = 0 : (segments - 1)
+    V_diff = V_diff - Charge(charges_q, Point([-1 + charges_len / 2 + charges_len * i, 0])).EvalPotentialField(mesh_x, mesh_y);
+end
+val_rms = rms(V_diff(:));
+
+%% Plotting
+figure(1);
+axis equal;
+heatmap(V_diff, "GridVisible", "off", "XLabel", [], "Y");
+title(["Difference - Potential Distribution", "Number of Segments = " + segments + ", RMS = " + val_rms + " (Wang Zhuoyang, 12112907)"]);
+xlabel("x (m)"), ylabel("y (m)"); % , zlabel("V (V)");
+saveas(1, "../fig/diff_seg=" + segments + ".png");
